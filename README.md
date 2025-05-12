@@ -16,3 +16,6 @@ npm install -g react-native-cli
 6. npx expo install --fix
 
 7. npx expo start
+
+8. Before start, you need to create ./.env file and input below:
+API_URL=http://your.ip.add.ress:port
