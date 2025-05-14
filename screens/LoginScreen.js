@@ -18,7 +18,7 @@ import { useAuth } from '../context/AuthContext';
 import styles from '../constants/styles';
 
 import { LOGIN_WAITING_TIME } from '../constants/settings';
-import { accessTokenKey } from '../constants/keys';
+import { accessTokenKey, refreshTokenKey } from '../constants/keys';
 
 export default function LoginScreen({ navigation }) {
   const [userId, setUserId] = useState('');
@@ -53,6 +53,8 @@ export default function LoginScreen({ navigation }) {
           console.log('이것이 result입니다.', result);  // FOR DEBUG
           if (result.is_auth) {
             await AsyncStorage.setItem(accessTokenKey, result.access_token);
+            await AsyncStorage.setItem(refreshTokenKey, result.refresh_token);
+            console.log('refresh!!: '+ result.refresh_token)
             dispatch({ type: 'SIGN_IN', token: result.access_token });
             setUser(result.user);
           } else {

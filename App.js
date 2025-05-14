@@ -14,7 +14,7 @@ import { getReservationDay } from './utils/utils';
 
 import styles from './constants/styles';
 
-const accessTokenKey = '@accessTokenKey';
+import { accessTokenKey, refreshTokenKey } from './constants/keys';
 
 function AppContent() {
   const { state, dispatch } = useAuth();
