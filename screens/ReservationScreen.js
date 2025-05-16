@@ -143,7 +143,7 @@ export default function ReservationScreen({ navigation }) {
               key={room.id}
               style={styles.room}
               onPress={() => loadReservationInfo(room.id)}>
-              <Text style={styles.roomName}>{room.number}</Text>
+              <Text style={styles.roomName}>{room.number}{"\n"}({room.name})</Text>
             </Pressable>
           ) : null)}
       </View>
@@ -153,7 +153,7 @@ export default function ReservationScreen({ navigation }) {
               key={room.id}
               style={styles.room}
               onPress={() => loadReservationInfo(room.id)}>
-              <Text style={styles.roomName}>{room.number}</Text>
+              <Text style={styles.roomName}>{room.number}{"\n"}({room.name})</Text>
           </Pressable>
         ) : null)}
       </View>

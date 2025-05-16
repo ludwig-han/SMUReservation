@@ -102,10 +102,15 @@ const styles = StyleSheet.create({
     },
     room: {
         backgroundColor: "#A5D8FF",
-        padding: 20,
+        padding: 13,
         borderRadius: 20,
+        alignItems: "center",       // 왜안돼
+        justifyContent: "center"
         //
     },
+    roomName: {
+        fontSize: 13
+    }
 });
 
 export default styles;
