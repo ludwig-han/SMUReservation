@@ -55,7 +55,27 @@ export default function RecordsScreen() {
                 <Text style={styles.timeText}>예약 시간: {`${getTime(item.start_time)}-${getTime(item.end_time)}`}</Text>
                 <Text style={styles.createdAtText}>신청일시: {getDateTime(item.created_at)}</Text>
             </View>
-            <Pressable
+            <Pressable      // Reservation Cancel Button
+                style={[
+                    item.location_status === 'unverified' 
+                    ? styles.cancelButton 
+                    : item.status === 'verified' 
+                    ? styles.completedCancelButton 
+                    : styles.cancelledCancelButton,
+                  ]}
+                onPress={() => onCancelPress(item.id)}
+                disabled={item.status !== 'unverified'}>
+                <Text style={
+                    item.status === 'verified' 
+                    ? styles.completedCancelButtonText 
+                    : styles.cancelButtonText
+                }>{item.status === 'unverified'
+                    ? '위치 인증' 
+                    : item.status === 'verified' 
+                    ? '인증됨' 
+                    : '기한 초과'}</Text>
+            </Pressable>
+            <Pressable      // Check Location
                 style={[
                     item.status === 'reserved' 
                     ? styles.cancelButton 
@@ -86,6 +106,7 @@ export default function RecordsScreen() {
         // "end_time": "2025-01-03-22-00-00",       // 예약 끝 시간
         // "room_id": 1,                            // 예약한 방 (고유 id)
         // "status": "reserved",                    // reserved, cancelled, in_progress, completed
+        // "location_status": "unverified"          // unverified, verified, failed
         // "created_at": "2025-01-03-16-06-11"}     // 예약 신청한 날짜
         const response = await apiRequest(`/reservations/user/${user.user_id}`);
         if (!response.ok) {

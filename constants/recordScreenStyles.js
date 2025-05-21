@@ -2,6 +2,8 @@ import { StyleSheet } from "react-native";
 
 const cancelButton = {
   flex: 1,
+  marginLeft: 10,
+  padding: 3,
   height: 40,
   fontWeight: 'bold',
   alignItems: 'center',
