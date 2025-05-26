@@ -1,9 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
+import * as Location from 'expo-location';
 import { View, Text, FlatList, Pressable, Alert, ActivityIndicator } from "react-native";
 import { apiRequest } from "../utils/api";
+import { LOCATION_M, LOCATION_UB, LOCATION_THRESHOLD_METERS, LOCATION_TEST } from "../constants/settings";
 import { getDate, getTime, getDateTime } from "../utils/utils";
 import UserContext from "../context/UserContext";
 import styles from "../constants/RecordScreenStyles";
+
 import ReservationContext, { useReservationContext } from "../context/ReservationContext";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -13,6 +16,26 @@ export default function RecordsScreen() {
 
     const { user, setUser } = useContext(UserContext);
     console.log('userdata: ', user);
+    
+    const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState(null);
+
+    const getDistanceFromLatLonInMeters = (lat1, lon1, lat2, lon2) => {
+        const R = 6371000; // 지구 반지름(m)
+        const dLat = deg2rad(lat2 - lat1);
+        const dLon = deg2rad(lon2 - lon1);
+        const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) *
+            Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    };
+
+    const deg2rad = (deg) => deg * (Math.PI / 180);
+
 
     const { availableRooms, setAvailableRooms } = useContext(ReservationContext);
 
@@ -45,7 +68,7 @@ export default function RecordsScreen() {
         }
     }
 
-    const Item = ({ item, onPress, onCancelPress }) => (
+    const Item = ({ item, onPress, onCancelPress, onVerifyPress }) => (
         <Pressable
             style={{...styles.recordContainer, backgroundColor: getStatusColor(item.status)}}
             onPress={onPress}>
@@ -63,15 +86,15 @@ export default function RecordsScreen() {
                     ? styles.completedCancelButton 
                     : styles.cancelledCancelButton,
                   ]}
-                onPress={() => onCancelPress(item.id)}
-                disabled={item.status !== 'unverified'}>
+                onPress={() => onVerifyPress(item.id)}
+                disabled={item.location_status !== 'unverified'}>
                 <Text style={
-                    item.status === 'verified' 
+                    item.location_status === 'verified' 
                     ? styles.completedCancelButtonText 
                     : styles.cancelButtonText
-                }>{item.status === 'unverified'
+                }>{item.location_status === 'unverified'
                     ? '위치 인증' 
-                    : item.status === 'verified' 
+                    : item.location_status === 'verified' 
                     ? '인증됨' 
                     : '기한 초과'}</Text>
             </Pressable>
@@ -115,6 +138,73 @@ export default function RecordsScreen() {
             const result = await response.json()
             setRecords(result);
         }
+    }
+
+    const verifyLocation = async (reservationId) => {
+        setLoading(true);
+        
+        // 위치 권한 요청
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if ( status !== 'granted') {
+             Alert.alert(
+                "위치 권한 필요",
+                "위치 인증을 위해 위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.",
+                [
+                    { text: '확인' }
+                ]
+            );
+            return;
+        }
+
+        // 현재 위치 받아오기
+        let currentLocation = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Highest,
+        });
+
+        const distance = getDistanceFromLatLonInMeters(
+            currentLocation.coords.latitude,
+            currentLocation.coords.longitude,
+            LOCATION_TEST.x,
+            LOCATION_TEST.y
+        );
+
+        // 인증 가능 범위 내에 있는 경우
+        if (distance > LOCATION_THRESHOLD_METERS) {
+            Alert.alert(
+                '인증 실패',
+                `연습실과 ${distance.toFixed(1)}m 떨어져 있습니다.`,
+                [{ text: '확인' }]
+            );
+        }
+        // 서버로 인증 요청
+        try {
+            const response = await apiRequest(`reservations/verify/${reservationId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `reservation_id=${reservationId}`,
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+            Alert.alert(`위치 인증 완료! (연습실 위치와 ${distance.toFixed(1)}m 거리입니다.)`, result.message, [
+                { text: '확인', onPress: getRecords },
+            ]);
+            } else {
+            console.error('서버 오류:', result);
+            Alert.alert(
+                '인증 실패',
+                result.message || '서버 오류로 인해 인증에 실패하였습니다.',
+                [{ text: '확인', onPress: getRecords }]
+            );
+            }
+        } catch (e) {
+            console.error('통신 오류:', e);
+            Alert.alert('오류', '서버와 통신 중 문제가 발생했습니다.');
+        } finally {
+            setLoading(false);
+        }
+        
     }
 
     const cancelReservation = async (reservationId) => {
@@ -165,6 +255,7 @@ export default function RecordsScreen() {
                 item={item}
                 //onPress={() => console.log('item pressed')}
                 onCancelPress={cancelReservation}
+                onVerifyPress={verifyLocation}
             />
         )
     }
@@ -188,14 +279,21 @@ export default function RecordsScreen() {
     )
 
     return (
-        <View style={styles.container}>{
-            <FlatList
-                data={records}
-                renderItem={renderItem}
-                keyExtractor={item => item.id}
-                //onRefresh={onRefresh}
-                //refreshing={refreshing}
-            />
-        }</View>
+  <View style={styles.container}>
+    <FlatList
+      data={records}
+      renderItem={renderItem}
+      keyExtractor={item => item.id.toString()}
+      onRefresh={onRefresh}
+      refreshing={refreshing}
+    />
+    {loading && (
+        <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color="#ffffff" />
+            <Text style={{ color: 'white', marginTop: 10 }}>잠시만 기다려주세요...</Text>
+        </View>
+        )}
+    </View>
     );
+
 }

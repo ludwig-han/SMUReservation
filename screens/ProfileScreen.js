@@ -1,5 +1,8 @@
 import React from "react";
 import { useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import { useLayoutEffect } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator,
         Modal, TouchableOpacity, TextInput, Button, Platform,
         TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView } from "react-native";
@@ -39,6 +42,17 @@ export default function ProfileScreen() {
     const [isDeactivateModalVisible, setDeactivateModalVisible] = useState(false);
     const [deactivateReason, setDeactivateReason] = useState("");
     const [targetDeactivateProfile, setTargetDeactivateProfile] = useState(null);
+
+    const navigation = useNavigation();
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+            <Pressable onPress={() => navigation.navigate('Settings')} style={{ marginRight: 15 }}>
+                <Ionicons name="settings-outline" size={24} color="black" />
+            </Pressable>
+            )
+        });
+        }, [navigation]);
 
     const openBanModal = (profile) => {
         setTargetProfile(profile);

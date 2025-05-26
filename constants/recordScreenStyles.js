@@ -18,6 +18,17 @@ const cancelButton = {
 }
 
 const styles = StyleSheet.create({
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // 반투명 배경
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10, // 다른 UI 위에 뜨게
+  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',  // 배경색

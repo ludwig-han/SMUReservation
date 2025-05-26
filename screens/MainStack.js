@@ -15,6 +15,7 @@ import RecordsScreen from './RecordsScreen';
 import BoardScreenStack from "./BoardScreenStack";
 //import BoardScreen from './BoardScreen';
 import ProfileScreen from './ProfileScreen';
+import SettingsScreen from './SettingsScreen';
 
 import { useAuth } from "../context/AuthContext";
 import { accessTokenKey, refreshTokenKey } from "../constants/keys";
@@ -125,11 +126,21 @@ export default function MainStack({ isAuthenticated }) {
     return (
         <Stack.Navigator>
             {isAuthenticated ? (
+                <>
                 <Stack.Screen
                     name="Tabs"
                     component={TabsComponents}
                     options={{ headerShown: false }}
                 />
+                <Stack.Screen
+                    name="Settings"
+                    component={SettingsScreen}
+                    options={{ 
+                        title: '설정',
+                        headerBackTitle: '뒤로',
+                    }}
+                />
+                </>
             ) : (
             <>
                 <Stack.Screen
