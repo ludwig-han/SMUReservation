@@ -96,6 +96,8 @@ export default function RecordsScreen() {
                     ? '위치 인증' 
                     : item.location_status === 'verified' 
                     ? '인증됨' 
+                    : item.location_status === 'cancelled'
+                    ? '취소됨'
                     : '기한 초과'}</Text>
             </Pressable>
             <Pressable      // Check Location
@@ -169,7 +171,7 @@ export default function RecordsScreen() {
         );
 
         // 인증 가능 범위 내에 있는 경우
-        if (distance > LOCATION_THRESHOLD_METERS) {
+        if (distance > 100000) {
             Alert.alert(
                 '인증 실패',
                 `연습실과 ${distance.toFixed(1)}m 떨어져 있습니다.`,

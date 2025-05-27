@@ -239,17 +239,34 @@ export function useReservationState() {
     }
 
     const checkPassedTimeslotKey = () => {
-      const today = getKoreanTime();
-      console.log(today);
+      console.log("🔍 checkPassedTimeslotKey 실행");
+
+      const now = getKoreanTime(); // 현재 한국 시간
       let key = 0;
-      console.log(settings.RESERVATION_OPEN_HOUR);
-      if (today.hour() < settings.RESERVATION_OPEN_HOUR) {
-        key = (today.hour() - 8) * 2;
-        key = key + Math.floor(today.minute() / 30);
+
+      // 기준: 오전 8시
+      const hour = now.hour();
+      const minute = now.minute();
+
+      // 현재 시간이 8시 이전이면 아무 slot도 지났다고 안 봄
+      if (hour < 8) {
+        key = 0;
+      } else {
+        const totalMinutes = (hour - 8) * 60 + minute;
+
+        // 10분 이상 지난 슬롯만 인정 (즉, 기준 슬롯 시작 후 10분 지났을 때부터 key +1)
+        if (totalMinutes >= 10) {
+          key = Math.floor((totalMinutes - 10) / 30) + 1;
+        } else {
+          key = 0;
+        }
       }
-      console.log('key: ', key);
+
+      console.log(`🕒 현재 시각: ${hour}:${minute}, 경과 타임슬롯 key: ${key}`);
       setPassedTimeslotKey(key);
-    }
+    };
+
+
 
     // 불러온 예약 정보를 바탕으로 예약된 시간대 목록을 리스트로 저장한다. 추후에 initializeTimeslot 함수에 활용됨.
     // (예약 정보를 불러오는 loadReservation 함수가 실행된 후에야 실행되어야 함.)
