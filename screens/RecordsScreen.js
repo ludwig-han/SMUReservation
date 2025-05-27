@@ -175,34 +175,36 @@ export default function RecordsScreen() {
                 `연습실과 ${distance.toFixed(1)}m 떨어져 있습니다.`,
                 [{ text: '확인' }]
             );
-        }
-        // 서버로 인증 요청
-        try {
-            const response = await apiRequest(`reservations/verify/${reservationId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `reservation_id=${reservationId}`,
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-            Alert.alert(`위치 인증 완료! (연습실 위치와 ${distance.toFixed(1)}m 거리입니다.)`, result.message, [
-                { text: '확인', onPress: getRecords },
-            ]);
-            } else {
-            console.error('서버 오류:', result);
-            Alert.alert(
-                '인증 실패',
-                result.message || '서버 오류로 인해 인증에 실패하였습니다.',
-                [{ text: '확인', onPress: getRecords }]
-            );
-            }
-        } catch (e) {
-            console.error('통신 오류:', e);
-            Alert.alert('오류', '서버와 통신 중 문제가 발생했습니다.');
-        } finally {
             setLoading(false);
+        } else {
+            // 서버로 인증 요청
+            try {
+                const response = await apiRequest(`reservations/verify/${reservationId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `reservation_id=${reservationId}`,
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                Alert.alert(`위치 인증 완료! (연습실 위치와 ${distance.toFixed(1)}m 거리입니다.)`, result.message, [
+                    { text: '확인', onPress: getRecords },
+                ]);
+                } else {
+                console.error('서버 오류:', result);
+                Alert.alert(
+                    '인증 실패',
+                    result.message || '서버 오류로 인해 인증에 실패하였습니다.',
+                    [{ text: '확인', onPress: getRecords }]
+                );
+                }
+            } catch (e) {
+                console.error('통신 오류:', e);
+                Alert.alert('오류', '서버와 통신 중 문제가 발생했습니다.');
+            } finally {
+                setLoading(false);
+            }
         }
         
     }
@@ -290,7 +292,12 @@ export default function RecordsScreen() {
     {loading && (
         <View style={styles.loadingOverlay}>
             <ActivityIndicator size="large" color="#ffffff" />
-            <Text style={{ color: 'white', marginTop: 10 }}>잠시만 기다려주세요...</Text>
+            <Text style={{ color: 'white', marginTop: 10, textAlign: 'center'
+             }}>
+  현재 위치 정보를 가져오는 중입니다.{"\n"}
+  약 10초 내로 완료되니 잠시만 기다려주세요.
+</Text>
+
         </View>
         )}
     </View>
