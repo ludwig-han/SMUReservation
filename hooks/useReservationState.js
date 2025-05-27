@@ -157,7 +157,7 @@ export function useReservationState() {
       
       // (3시간 내에서 선택시) 연속 선택
       console.log('선택한 키: ', key)
-      if ((key >= 40 && key <= firstKey + 15) || (key < 40 && key <= firstKey + 11)) {
+      if ((key >= 20 && key <= firstKey + 7) || (key < 20 && key <= firstKey + 5)) {
         let tmp = [];
         for (let i=firstKey; i <= key; i++)
           tmp.push(i);
@@ -200,13 +200,20 @@ export function useReservationState() {
 
         const STARTTIME = 8;
         const ENDTIME = 22;
-        const TIMEDIVISION = 4;
+        const TIMEDIVISION = 2;
         const timeslotLength = (ENDTIME - STARTTIME) * TIMEDIVISION;
-        for (let i = 0; i < timeslotLength; i = i + TIMEDIVISION) {   // timeslot rows
+        const SLOT_PER_ROW = 4;
+
+        for (let i = 0; i < timeslotLength; i += SLOT_PER_ROW) {   // timeslot rows
           tmp.push(
-          <View style={styles.timeslotRow} key={`row-${i/TIMEDIVISION}`}>
+          <View style={styles.timeslotRow} key={`row-${i/SLOT_PER_ROW}`}>
             {[0, 1, 2, 3].map((offset) => {
               const key = i + offset;
+              // guard: 총 슬롯 수 초과 시 빈칸 채우지 않음
+              if (key >= timeslotLength) return null;
+              const hour = Math.floor(key / TIMEDIVISION) + STARTTIME;
+              const minute = (60 / TIMEDIVISION) * (key % TIMEDIVISION);
+              
               const style = reservedTimeslotKey.includes(key)
                           ? styles.timeslotOccupied
                           : passedTimeslotKey > key
@@ -221,7 +228,7 @@ export function useReservationState() {
                   style={style}
                   onPress={() => selectTimeslot(key)}
                 >
-                  <Text>{(i/TIMEDIVISION)+ STARTTIME}시 {(60 / TIMEDIVISION)*(key % TIMEDIVISION)}분</Text>
+                  <Text>{hour}시 {minute}분</Text>
                 </Pressable>
               )
             })}
@@ -237,8 +244,8 @@ export function useReservationState() {
       let key = 0;
       console.log(settings.RESERVATION_OPEN_HOUR);
       if (today.hour() < settings.RESERVATION_OPEN_HOUR) {
-        key = (today.hour() - 8) * 4;
-        key = key + Math.floor(today.minute() / 15);
+        key = (today.hour() - 8) * 2;
+        key = key + Math.floor(today.minute() / 30);
       }
       console.log('key: ', key);
       setPassedTimeslotKey(key);
@@ -254,8 +261,8 @@ export function useReservationState() {
         const endTime = info.end_time.split('-').slice(-3, -1).map((value) => parseInt(value));     // X시 X분 -> [X, X]
         console.log('start time: ', startTime, 'end time: ', endTime);
   
-        const startTimeslot = (startTime[0] - 8) * 4 + startTime[1]/15;
-        const endTimeslot = (endTime[0] - 8) * 4 + endTime[1]/15 - 1;
+        const startTimeslot = (startTime[0] - 8) * 2 + startTime[1]/30;
+        const endTimeslot = (endTime[0] - 8) * 2 + endTime[1]/30 - 1;
   
         let _group = [];
         for (let i = startTimeslot; i <= endTimeslot; i++) {
@@ -299,10 +306,10 @@ export function useReservationState() {
         const today = getReservationDay(settings.RESERVATION_OPEN_HOUR);
         console.log('예약하고자 하는 날짜: ', today);
         
-        const startHour = String(Math.floor(selectedTimeslotKey[0] / 4) + 8).padStart(2, '0');
-        const startMinute = String((selectedTimeslotKey[0] % 4) * 15).padStart(2, '0');
-        let endHour = Math.floor(selectedTimeslotKey[selectedTimeslotKey.length - 1] / 4) + 8;
-        let endMinute = (selectedTimeslotKey[selectedTimeslotKey.length - 1] % 4 + 1) * 15;
+        const startHour = String(Math.floor(selectedTimeslotKey[0] / 2) + 8).padStart(2, '0');
+        const startMinute = String((selectedTimeslotKey[0] % 2) * 30).padStart(2, '0');
+        let endHour = Math.floor(selectedTimeslotKey[selectedTimeslotKey.length - 1] / 2) + 8;
+        let endMinute = (selectedTimeslotKey[selectedTimeslotKey.length - 1] % 2 + 1) * 30;
       
         if (endMinute >= 60) {
           endHour = endHour + 1;
