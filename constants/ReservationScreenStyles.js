@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet } from 'react-native';
 import { SMU_COLORS } from "./colors";
 
 const timeslot = {
@@ -11,14 +11,63 @@ const timeslot = {
     borderColor: SMU_COLORS.SMDarkgray
 };
 
+
+
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#f5f5f5",
-        padding: 20,
-        flexDirection: "row",
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 10,
+  },
+
+  // 드롭다운 감싸는 컨테이너
+  buildingPickerContainer: {
+    height: 60,
+    marginBottom: 15,
+  },
+  pickerContainer: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginVertical: 10,
+    backgroundColor: '#fff',  // 배경색 추가
     },
-    modalView: {
+  picker: {
+    height: 50,
+    width: '100%',
+  },
+  roomListContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+  },
+  room: {
+    backgroundColor: '#A5D8FF',
+    padding: 13,
+    borderRadius: 20,
+    margin: 5,
+    width: '30%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 60
+  },
+  roomName: {
+    fontSize: 13,
+    textAlign: 'center',
+    textAlignVertical: 'center', // Android 대응
+  },
+  noRoomsText: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 30,
+  },
+
+  // --- modal 및 timeslot 관련 스타일 (건드리지 마세요) ---
+
+  modalView: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
@@ -79,38 +128,12 @@ const styles = StyleSheet.create({
     modalRoomNumberContainer: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     modalRoomNumberText: {
         fontSize: 30,
+        marginTop: 35
     },
-    leftContainer: {
-        flex: 1.5,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-around",
-        marginBottom: 300,
-        //backgroundColor: "red",     // FOR DEBUG
-    },
-    rightContainer: {
-        flex: 1,
-        flexDirection: "column-reverse",
-        alignItems: "center",
-        justifyContent: "space-around",
-        //backgroundColor: "blue",    // FOR DEBUG
-        
-    },
-    room: {
-        backgroundColor: "#A5D8FF",
-        padding: 13,
-        borderRadius: 20,
-        alignItems: "center",       // 왜안돼
-        justifyContent: "center"
-        //
-    },
-    roomName: {
-        fontSize: 13
-    }
 });
 
 export default styles;

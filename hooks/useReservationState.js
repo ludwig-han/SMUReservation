@@ -249,7 +249,7 @@ export function useReservationState() {
       const minute = now.minute();
 
       // 현재 시간이 8시 이전이면 아무 slot도 지났다고 안 봄
-      if (hour < 8) {
+      if (hour >= 22) {
         key = 0;
       } else {
         const totalMinutes = (hour - 8) * 60 + minute;
