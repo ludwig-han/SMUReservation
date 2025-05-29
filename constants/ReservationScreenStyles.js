@@ -11,6 +11,16 @@ const timeslot = {
     borderColor: SMU_COLORS.SMDarkgray
 };
 
+const room = {
+    backgroundColor: '#A5D8FF',
+    padding: 7,
+    borderRadius: 20,
+    margin: 5,
+    width: '30%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 50
+  };
 
 
 const styles = StyleSheet.create({
@@ -43,16 +53,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
   },
-  room: {
-    backgroundColor: '#A5D8FF',
-    padding: 13,
-    borderRadius: 20,
-    margin: 5,
-    width: '30%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 60
-  },
+  
   roomName: {
     fontSize: 13,
     textAlign: 'center',
@@ -64,6 +65,51 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 30,
   },
+rowContainer: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  paddingHorizontal: 10,
+},
+leftContainer: {
+  flex: 1,
+  alignItems: 'center',
+},
+rightContainer: {
+  flex: 1,
+  alignItems: 'center',
+},
+
+  // 기존 코드 아래에 추가
+room: room,
+roomUB3: {
+  ...room,
+  backgroundColor: '#FFD700',
+  width: '50%',
+},
+roomUB4: {
+  ...room,
+  backgroundColor: '#90EE90',
+  width: '60%',
+},
+roomM1: {
+  ...room,
+  backgroundColor: '#B0A8F4',
+  width: '45%',
+},
+roomListRowCentered: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  justifyContent: 'center',
+},
+roomListColumn: {
+  flexDirection: 'column',
+  alignItems: 'center',
+},
+roomListSpaceBetween: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  justifyContent: 'space-between',
+},
 
   // --- modal 및 timeslot 관련 스타일 (건드리지 마세요) ---
 

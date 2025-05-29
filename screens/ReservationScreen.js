@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, Pressable, Modal, ActivityIndicator } from 'react-native';
-import { TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, Pressable, Modal, ActivityIndicator, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
@@ -11,12 +10,133 @@ import { useAuth } from '../context/AuthContext';
 import UserContext from '../context/UserContext';
 import ReservationContext from '../context/ReservationContext';
 
+// --- 건물별 배치 레이아웃 컴포넌트들 ---
+
+function UB3RoomLayout({ rooms, onPressRoom }) {
+  const leftRooms = rooms.filter(room =>
+    ['UB309', 'UB310'].includes(room.number.toUpperCase())
+  );
+  const rightRooms = rooms.filter(room =>
+    !['UB309', 'UB310'].includes(room.number.toUpperCase())
+  );
+
+  return (
+    <View style={styles.rowContainer}>
+      {/* 왼쪽 컨테이너 */}
+      <View style={styles.leftContainer}>
+        {leftRooms.map(room => (
+          <Pressable key={room.id} style={styles.roomUB3} onPress={() => onPressRoom(room.id)}>
+            <Text style={styles.roomName}>{room.number}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {/* 오른쪽 컨테이너 */}
+      <View style={styles.rightContainer}>
+        {rightRooms.map(room => (
+          <Pressable key={room.id} style={styles.roomUB3} onPress={() => onPressRoom(room.id)}>
+            <Text style={styles.roomName}>{room.number}</Text>
+          </Pressable>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+
+function UB4RoomLayout({ rooms, onPressRoom }) {
+  const leftNumbers = ['UB410', 'UB411', 'UB412', 'UB413', 'UB414'];
+  const leftRooms = rooms.filter(room => leftNumbers.includes(room.number.toUpperCase()));
+  const rightRooms = rooms.filter(room => !leftNumbers.includes(room.number.toUpperCase()));
+
+  return (
+    <View style={styles.rowContainer}>
+      <View style={styles.leftContainer}>
+        {leftRooms.map(room => (
+          <Pressable key={room.id} style={styles.roomUB4} onPress={() => onPressRoom(room.id)}>
+            <Text style={styles.roomName}>
+              {room.number}
+              {room.name && room.name.trim() !== '' ? `\n(${room.name})` : ''}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+      <View style={styles.rightContainer}>
+        {rightRooms.map(room => (
+          <Pressable key={room.id} style={styles.roomUB4} onPress={() => onPressRoom(room.id)}>
+            <Text style={styles.roomName}>
+              {room.number}
+              {room.name && room.name.trim() !== '' ? `\n(${room.name})` : ''}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function M1RoomLayout({ rooms, onPressRoom }) {
+  const leftNumbers = ['M033', 'M032', 'M031', 'M034', 'M035', 'M036'];
+  const leftRooms = rooms.filter(room => leftNumbers.includes(room.number.toUpperCase()));
+  const rightRooms = rooms.filter(room => !leftNumbers.includes(room.number.toUpperCase()));
+
+  return (
+    <View style={styles.rowContainer}>
+      <View style={styles.leftContainer}>
+        {leftRooms.map(room => (
+          <Pressable key={room.id} style={styles.roomM1} onPress={() => onPressRoom(room.id)}>
+            <Text style={styles.roomName}>{room.number}</Text>
+          </Pressable>
+        ))}
+      </View>
+      <View style={styles.rightContainer}>
+        {rightRooms.map(room => (
+          <Pressable key={room.id} style={styles.roomM1} onPress={() => onPressRoom(room.id)}>
+            <Text style={styles.roomName}>{room.number}</Text>
+          </Pressable>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+
+function renderRoomLayout(location, floor, rooms, onPressRoom) {
+  if (rooms.length === 0) {
+    return <Text style={styles.noRoomsText}>예약 가능한 방이 없습니다.</Text>;
+  }
+
+  if (location === 'UB' && floor === 3) {
+    return <UB3RoomLayout rooms={rooms} onPressRoom={onPressRoom} />;
+  } else if (location === 'UB' && floor === 4) {
+    return <UB4RoomLayout rooms={rooms} onPressRoom={onPressRoom} />;
+  } else if (location === 'M' && floor === 1) {
+    return <M1RoomLayout rooms={rooms} onPressRoom={onPressRoom} />;
+  } else {
+    // 기본 레이아웃
+    return (
+      <View style={styles.roomListContainer}>
+        {rooms.map(room => (
+          <Pressable
+            key={room.id}
+            style={styles.room}
+            onPress={() => onPressRoom(room.id)}
+          >
+            <Text style={styles.roomName}>
+              {room.number}
+              {room.name && room.name.trim() !== '' ? `\n(${room.name})` : ''}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+    );
+  }
+}
+
 export default function ReservationScreen() {
   const [isLoading, setIsLoading] = useState(false);
-
-   // 드롭다운 오픈 상태, 선택값, 옵션 리스트 상태로 관리
   const [open, setOpen] = useState(false);
-  const [selectedOptionValue, setSelectedOptionValue] = useState('0');  // 기본값은 문자열 '0'
+  const [selectedOptionValue, setSelectedOptionValue] = useState('0');
   const [items, setItems] = useState([
     { label: '문화예술관 3층', value: '0', location: 'UB', floor: 3 },
     { label: '문화예술관 4층', value: '1', location: 'UB', floor: 4 },
@@ -25,7 +145,7 @@ export default function ReservationScreen() {
 
   const { state, dispatch } = useAuth();
   const { user, setUser } = useContext(UserContext);
-  const { availableRooms, setAvailableRooms } = useContext(ReservationContext);
+  const { availableRooms } = useContext(ReservationContext);
 
   const {
     modalVisible,
@@ -48,6 +168,13 @@ export default function ReservationScreen() {
     handleReservation,
     setReservationInfoGroup
   } = useReservationState(dispatch);
+
+  const selectedOption = items.find(item => item.value === selectedOptionValue);
+  const filteredRooms = availableRooms.filter(
+    (room) =>
+      room.location === selectedOption.location &&
+      room.floor === selectedOption.floor
+  );
 
   const getUserdata = async () => {
     try {
@@ -78,23 +205,11 @@ export default function ReservationScreen() {
     initializeTimeslots();
   }, [reservedTimeslotKey, passedTimeslotKey]);
 
-  // 선택된 옵션 가져오기 (value가 문자열이므로 숫자 변환)
-  const selectedOptionIndex = parseInt(selectedOptionValue, 10);
-  const selectedOption = items.find(item => item.value === selectedOptionValue);
-
-  // 필터링
-  const filteredRooms = availableRooms.filter(
-    (room) =>
-      room.location === selectedOption.location &&
-      room.floor === selectedOption.floor
-  );
-
-
   return (
-     <TouchableWithoutFeedback
+    <TouchableWithoutFeedback
       onPress={() => {
-        if (open) setOpen(false); // 드롭다운이 열려 있으면 닫기
-        Keyboard.dismiss();        // 키보드도 같이 닫히게 처리
+        if (open) setOpen(false);
+        Keyboard.dismiss();
       }}
     >
       <View style={styles.container}>
@@ -113,25 +228,13 @@ export default function ReservationScreen() {
           />
         </View>
 
-        {/* 방 리스트 */}
-        <View style={styles.roomListContainer}>
-          {filteredRooms.length === 0 ? (
-            <Text>예약 가능한 방이 없습니다.</Text>
-          ) : (
-            filteredRooms.map((room) => (
-              <Pressable
-                key={room.id}
-                style={styles.room}
-                onPress={() => loadReservationInfo(room.id)}
-              >
-                <Text style={styles.roomName}>
-                  {room.number}
-                  {room.name && room.name.trim() !== '' ? `\n(${room.name})` : ''}
-                </Text>
-              </Pressable>
-            ))
-          )}
-        </View>
+        {/* 건물/층별 방 리스트 렌더링 */}
+        {renderRoomLayout(
+          selectedOption.location,
+          selectedOption.floor,
+          filteredRooms,
+          loadReservationInfo
+        )}
 
         {/* 예약 모달 */}
         <Modal visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
