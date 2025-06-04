@@ -1,6 +1,6 @@
 
-import React, { useContext } from "react";
-import { Pressable, Alert } from "react-native";
+import React, { useContext, useState } from "react";
+import { Pressable, Alert, Modal } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -62,6 +62,37 @@ function TabsComponents() {
         )
     }
 
+    const displayHelpModal = async () => {
+        return (
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                    setModalVisible(!modalVisible);
+                }}>
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                    <Text style={styles.modalText}>Hello World!</Text>
+                    <Pressable
+                        style={[styles.button, styles.buttonClose]}
+                        onPress={() => setModalVisible(!modalVisible)}>
+                        <Text style={styles.textStyle}>Hide Modal</Text>
+                    </Pressable>
+                    </View>
+                </View>
+            </Modal>
+        )
+    }
+
+
+    const renderHelpButton = () => (
+        <Pressable onPress={displayHelpModal} style={{marginRight: 12}}>
+            <MaterialIcons name="help" size={30} color='#007AFF'/>
+        </Pressable>
+    )
+
     const renderLogoutButton = () => (
         <Pressable onPress={logout} style={{ marginLeft: 10 }}>
           <MaterialIcons name="logout" size={24} color='#007AFF'/>
@@ -86,7 +117,8 @@ function TabsComponents() {
                 headerTitle: "예약",
                 tabBarIcon: ((color) => (
                     <MaterialIcons name="piano" size={24} color={color} />
-                ))
+                )),
+                headerRight: renderHelpButton
             }}
         s/>
         <Tab.Screen name="Records" component={RecordsScreen}
@@ -123,6 +155,7 @@ function TabsComponents() {
 }
 
 export default function MainStack({ isAuthenticated }) {
+    const [modalVisible, setModalVisible] = useState(false);
     return (
         <Stack.Navigator>
             {isAuthenticated ? (
